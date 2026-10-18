@@ -39,18 +39,10 @@
     <!-- Ekran startowy -->
     <section data-screen="home" class="screen">
       <h1>Trening konwergencji</h1>
+
       <div class="stats">
         <div><span id="stat-today">0</span><small>powtórzeń dziś</small></div>
         <div><span id="stat-week">0</span><small>sesji w 7 dni</small></div>
-      </div>
-
-      <div class="plan">
-        <div class="plan-head">
-          <strong>Ten tydzień</strong>
-          <span id="week-text" class="muted small"></span>
-        </div>
-        <div class="track"><div id="week-fill" class="fill"></div></div>
-        <p id="today-text" class="muted small"></p>
       </div>
 
       <div id="checkup-card" class="notice" hidden>
@@ -58,23 +50,40 @@
         <p id="checkup-text" class="small"></p>
       </div>
 
-      <p id="stat-last" class="muted small"></p>
-      <p id="streak-text" class="small"></p>
-      <label>Ćwiczenie dziś
+      <section class="box">
+        <div class="plan-head">
+          <strong>Ten tydzień</strong>
+          <span id="week-text" class="muted small"></span>
+        </div>
+        <div class="track"><div id="week-fill" class="fill"></div></div>
+        <p id="today-text" class="muted small"></p>
+        <p id="streak-text" class="small"></p>
+      </section>
+
+      <section class="box">
+        <label class="field-label" for="exercise">Ćwiczenie na dziś</label>
         <select id="exercise"></select>
-      </label>
-      <p id="exercise-desc" class="muted small"></p>
-      <button id="btn-start" class="btn primary big">Rozpocznij sesję</button>
-      <p class="muted small">
-        <strong>Przerwij ćwiczenie</strong>, jeśli pojawi się ból, zawroty głowy lub uporczywe podwójne widzenie.
-      </p>
-      <p class="muted small">
-        Przybliżaj ołówek (lub telefon) do nosa w rytmie kółka. Gdy wykonasz pełne przybliżenie, naciśnij „+1”.
-      </p>
-      <p class="muted small">
-        Osobne ćwiczenie higieny oka, bez związku z konwergencją: ruchy gałkami w 8 kierunków.
-      </p>
-      <a href="ruchy.html" class="btn ghost">Ruchy gałek (higiena oka)</a>
+        <p id="exercise-desc" class="hint"></p>
+        <button id="btn-start" class="btn primary big">Zacznij sesję</button>
+        <p id="stat-last" class="muted small center"></p>
+      </section>
+
+      <details class="tips">
+        <summary>Jak ćwiczyć?</summary>
+        <ul>
+          <li>Przybliżaj ołówek lub telefon do nosa w rytmie kółka.</li>
+          <li>Gdy dojdziesz do pełnego przybliżenia, naciśnij „+1”.</li>
+          <li>Ból, zawroty głowy lub podwójne widzenie: przerwij od razu.</li>
+        </ul>
+      </details>
+
+      <a href="ruchy.html" class="link-card">
+        <span>
+          <strong>Ruchy gałek</strong>
+          <small>Higiena oka, bez związku z konwergencją</small>
+        </span>
+        <span aria-hidden="true">→</span>
+      </a>
     </section>
 
     <!-- Ekran treningu -->

@@ -315,6 +315,70 @@ body.training .toast { bottom: 24px; }
   margin: 12px auto;
 }
 
+/* Ekran startowy: karty i podpowiedzi */
+.field-label { display: block; color: var(--muted); font-size: 0.9rem; margin: 0 0 6px; }
+.box {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 12px 0;
+}
+.box select { margin-bottom: 4px; }
+.hint { color: var(--muted); font-size: 0.9rem; margin: 6px 0 12px; min-height: 2.4em; }
+.center { text-align: center; margin: 8px 0 0; }
+.tips {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+.tips summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+.tips ul { padding-left: 18px; margin: 10px 0 4px; color: var(--muted); }
+.tips li { margin: 6px 0; }
+.link-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 12px 0;
+  color: var(--text);
+  text-decoration: none;
+}
+.link-card small { display: block; color: var(--muted); margin-top: 2px; }
+.link-card span[aria-hidden] { color: var(--accent); font-size: 1.4rem; }
+
+/* Kafelki trybów z ikonami */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+.mode {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 8px;
+  margin: 0;
+  cursor: pointer;
+}
+.mode input { position: absolute; opacity: 0; pointer-events: none; }
+.mode svg { width: 30px; height: 30px; color: var(--muted); }
+.mode strong { font-size: 0.95rem; }
+.mode small { color: var(--muted); font-size: 0.75rem; line-height: 1.3; }
+.mode:has(input:checked) { border-color: var(--accent); background: #112a33; }
+.mode:has(input:checked) svg { color: var(--accent); }
+.mode:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 /* Wybór ćwiczenia */
 select {
   display: block;

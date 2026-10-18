@@ -23,12 +23,33 @@
       <label>Czas ćwiczenia: <output id="out-minutes">3</output> min
         <input id="set-minutes" type="range" min="1" max="10" step="1" value="3">
       </label>
-      <fieldset class="radio-set">
-        <legend>Tempo</legend>
-        <label class="check"><input type="radio" name="mode" value="wolny"> Wolny</label>
-        <label class="check"><input type="radio" name="mode" value="normalny"> Normalny</label>
-        <label class="check"><input type="radio" name="mode" value="szybki" checked> Szybki (obecne tempo)</label>
-      </fieldset>
+      <p class="field-label">Tempo</p>
+      <div class="mode-grid" role="radiogroup" aria-label="Tempo">
+        <label class="mode">
+          <input type="radio" name="mode" value="wolny">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 3h12M6 21h12M7 3c0 4 10 5 10 9s-10 5-10 9M17 3c0 4-10 5-10 9s10 5 10 9"/>
+          </svg>
+          <strong>Wolny</strong>
+          <small>2× wolniej, spokojnie</small>
+        </label>
+        <label class="mode">
+          <input type="radio" name="mode" value="normalny">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 15a9 9 0 0 1 18 0"/><path d="M12 15l4-4"/><circle cx="12" cy="15" r="1.2"/>
+          </svg>
+          <strong>Normalny</strong>
+          <small>1,5× wolniej</small>
+        </label>
+        <label class="mode">
+          <input type="radio" name="mode" value="szybki" checked>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M13 2L4 14h7l-1 8 9-12h-7z"/>
+          </svg>
+          <strong>Szybki</strong>
+          <small>Standardowe tempo</small>
+        </label>
+      </div>
 
       <label class="check"><input id="set-vibrate" type="checkbox" checked> Wibracja</label>
 
