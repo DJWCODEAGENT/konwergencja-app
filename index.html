@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <title>Trening konwergencji</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Informacja o bezpieczeństwie (pokazywana przy pierwszym uruchomieniu) -->
+  <div id="disclaimer" class="overlay" hidden>
+    <div class="card">
+      <h2>Zanim zaczniesz</h2>
+      <p>Ta aplikacja nie jest wyrobem medycznym. Nie diagnozuje ani nie leczy niedomogi konwergencji.</p>
+      <ul>
+        <li>Najpierw skonsultuj się z ortoptystą lub optometrystą.</li>
+        <li>Przerwij ćwiczenie przy bólu, zawrotach głowy lub uporczywym podwójnym widzeniu.</li>
+        <li>Ćwicz przy dobrym świetle, siedząc.</li>
+      </ul>
+      <button id="disclaimer-ok" class="btn primary big">Rozumiem</button>
+    </div>
+  </div>
+
+  <main>
+    <!-- Ekran startowy -->
+    <section data-screen="home" class="screen">
+      <h1>Trening konwergencji</h1>
+      <div class="stats">
+        <div><span id="stat-today">0</span><small>powtórzeń dziś</small></div>
+        <div><span id="stat-week">0</span><small>sesji w 7 dni</small></div>
+      </div>
+      <p id="stat-last" class="muted small"></p>
+      <button id="btn-start" class="btn primary big">Rozpocznij sesję</button>
+      <p class="muted small">
+        Przybliżaj ołówek (lub telefon) do nosa w rytmie kółka. Gdy wykonasz pełne przybliżenie, naciśnij „+1”.
+      </p>
+    </section>
+
+    <!-- Ekran treningu -->
+    <section data-screen="train" class="train" hidden>
+      <div class="train-head">
+        <span id="train-time">00:00</span>
+        <span><span id="train-count">0</span> powt.</span>
+      </div>
+      <div class="stage">
+        <div id="target" class="target"><div class="core"></div></div>
+      </div>
+      <p class="muted small">Kółko rośnie i maleje. Przybliżaj, gdy rośnie, cofaj, gdy maleje.</p>
+      <button id="btn-rep" class="btn primary big">+1 powtórzenie</button>
+      <button id="btn-stop" class="btn ghost">Zakończ</button>
+    </section>
+
+    <!-- Historia -->
+    <section data-screen="history" class="screen" hidden>
+      <h1>Historia</h1>
+      <h3>Powtórzenia z ostatnich 14 dni</h3>
+      <div id="chart"></div>
+      <p class="muted small">Najnowszy dzień po prawej.</p>
+      <h3>Sesje</h3>
+      <ul id="session-list" class="list"></ul>
+      <p id="history-empty" class="muted" hidden>Brak zapisanych sesji.</p>
+    </section>
+
+    <!-- Ustawienia -->
+    <section data-screen="settings" class="screen" hidden>
+      <h1>Ustawienia</h1>
+
+      <label>Długość sesji: <output id="out-duration"></output> min
+        <input id="set-duration" type="range" min="1" max="10" step="1">
+      </label>
+
+      <label>Tempo (sekundy na pełny cykl): <output id="out-tempo"></output> s
+        <input id="set-tempo" type="range" min="3" max="8" step="0.5">
+      </label>
+
+      <label class="check"><input id="set-sound" type="checkbox"> Dźwięk rytmu</label>
+      <label class="check"><input id="set-vibrate" type="checkbox"> Wibracja przy powtórzeniu</label>
+
+      <h3>Dane</h3>
+      <button id="btn-export" class="btn ghost">Eksportuj dane (JSON)</button>
+      <label class="btn ghost">Importuj dane (JSON)
+        <input id="file-import" type="file" accept="application/json" hidden>
+      </label>
+      <button id="btn-reset" class="btn danger">Usuń wszystkie sesje</button>
+      <button id="btn-show-disclaimer" class="btn ghost">Pokaż informację o bezpieczeństwie</button>
+
+      <p class="muted small">Dane są zapisywane tylko w tej przeglądarce, na tym urządzeniu.</p>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button data-nav="home">Start</button>
+    <button data-nav="history">Historia</button>
+    <button data-nav="settings">Ustawienia</button>
+  </nav>
+
+  <div id="toast" class="toast" hidden role="status"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

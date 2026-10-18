@@ -1,0 +1,225 @@
+:root {
+  --bg: #0b1220;
+  --card: #131d33;
+  --text: #e6edf7;
+  --muted: #8b9bb4;
+  --accent: #2dd4bf;
+  --accent-ink: #06201c;
+  --danger: #f87171;
+  --line: #2a3858;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) 0 calc(72px + env(safe-area-inset-bottom));
+}
+
+body.training { padding-bottom: 0; }
+
+main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+h1 { font-size: 1.6rem; margin: 8px 0 16px; }
+h2 { margin-top: 0; }
+h3 { margin: 24px 0 8px; font-size: 1rem; color: var(--muted); font-weight: 600; }
+
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+
+/* Statystyki na ekranie startowym */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0 12px;
+}
+.stats div {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+}
+.stats span { display: block; font-size: 2.2rem; font-weight: 700; color: var(--accent); }
+.stats small { color: var(--muted); }
+
+/* Przyciski */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: 600;
+  background: #1e2a45;
+  color: var(--text);
+  cursor: pointer;
+  width: 100%;
+  margin: 6px 0;
+  text-align: center;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.big { padding: 18px; font-size: 1.1rem; margin: 12px 0; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); }
+.btn.danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.btn.small { width: auto; padding: 8px 12px; font-size: 0.9rem; margin: 0; }
+
+/* Ustawienia */
+label { display: block; margin: 14px 0; }
+label.btn { display: flex; }
+label.btn input { display: none; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.check { display: flex; align-items: center; gap: 10px; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* Lista sesji */
+.list { list-style: none; padding: 0; margin: 0; }
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+.list li div { display: flex; flex-direction: column; }
+.list li small { color: var(--muted); }
+
+/* Dolny pasek nawigacji */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #0f1729;
+  border-top: 1px solid #1d2842;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar button {
+  flex: 1;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  padding: 14px 0;
+  font: inherit;
+  font-weight: 600;
+}
+.tabbar button.active { color: var(--accent); }
+body.training .tabbar { display: none; }
+
+/* Ekran treningu */
+.train {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 20px 16px;
+  text-align: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.train-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.train .btn.big { max-width: 420px; }
+.stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 16px 0;
+}
+.target {
+  width: min(72vw, 320px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px dashed var(--line);
+  display: grid;
+  place-items: center;
+}
+.core {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #5eead4 0%, #0d9488 70%);
+  transform: scale(0.35);
+  opacity: 0.6;
+}
+.target.animating .core {
+  animation: breathe var(--tempo, 4s) ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(0.35); opacity: 0.6; }
+  50%      { transform: scale(1); opacity: 1; }
+}
+
+/* Nakładki i powiadomienia */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.8);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 10;
+}
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 22px;
+  max-width: 420px;
+}
+.card ul { padding-left: 18px; color: var(--muted); }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(90px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  background: #1e2a45;
+  padding: 10px 16px;
+  border-radius: 12px;
+  max-width: 90vw;
+  z-index: 20;
+}
+body.training .toast { bottom: 24px; }
+
+/* Wykres */
+#chart svg {
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 8px;
+  display: block;
+}
+#chart .bar { fill: var(--accent); opacity: 0.85; }
+
+@media (prefers-reduced-motion: reduce) {
+  .target.animating .core { animation: none; }
+}
