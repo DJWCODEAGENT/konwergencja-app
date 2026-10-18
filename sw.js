@@ -1,7 +1,7 @@
 // Service worker: pozwala uruchomić aplikację bez internetu.
 // Po zmianie plików podbij numer wersji CACHE, żeby użytkownicy dostali nowe pliki.
 
-const CACHE = 'konwergencja-v1';
+const CACHE = 'konwergencja-v2';
 const ASSETS = [
   './',
   './index.html',

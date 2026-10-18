@@ -7,7 +7,8 @@ const MIN_SAVED_SEC = 10; // krótsze sesje nie są zapisywane
 
 let data = loadData();
 let run = null;       // aktywna sesja treningowa
-let timer = null;     // interwał odświeżania ekranu treningu
+let timer = null;     // interwał: czas, dźwięk, koniec sesji
+let frameId = null;   // pętla klatek: rozmiar kółka i podpis
 let wakeLock = null;  // blokada wygaszania ekranu
 let audioCtx = null;
 
@@ -107,9 +108,6 @@ async function startTraining() {
     lastCycle: -1,
   };
 
-  const target = $('#target');
-  target.style.setProperty('--tempo', `${data.settings.tempoSec}s`);
-  target.classList.add('animating');
   $('#train-count').textContent = '0';
   show('train');
 
@@ -119,6 +117,25 @@ async function startTraining() {
 
   tick();
   timer = setInterval(tick, 200);
+  frameId = requestAnimationFrame(frame);
+}
+
+// Rozmiar kółka i podpis liczone z czasu, płynnie co klatkę.
+// Faza 0..0.5 – kółko rośnie (przybliżaj), 0.5..1 – maleje (cofaj).
+function frame() {
+  if (!run) return;
+  const tempoMs = data.settings.tempoSec * 1000;
+  const phase = ((Date.now() - run.startedAt) % tempoMs) / tempoMs;
+  const t = phase < 0.5 ? phase * 2 : (1 - phase) * 2; // 0 → 1 → 0
+  const size = 0.25 + 0.75 * t;
+
+  $('#core').style.transform = `scale(${size.toFixed(3)})`;
+
+  const cue = phase < 0.5 ? 'Przybliżaj' : 'Cofaj';
+  const cueEl = $('#cue');
+  if (cueEl.textContent !== cue) cueEl.textContent = cue;
+
+  frameId = requestAnimationFrame(frame);
 }
 
 function tick() {
@@ -148,9 +165,11 @@ function finishTraining() {
   if (!run) return;
   clearInterval(timer);
   timer = null;
+  cancelAnimationFrame(frameId);
+  frameId = null;
+  $('#core').style.transform = 'scale(0.25)';
   try { wakeLock?.release(); } catch { /* ignorujemy */ }
   wakeLock = null;
-  $('#target').classList.remove('animating');
 
   const seconds = Math.round((Date.now() - run.startedAt) / 1000);
   const reps = run.reps;
