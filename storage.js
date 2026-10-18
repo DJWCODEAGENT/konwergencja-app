@@ -3,15 +3,22 @@
 const KEY = 'konwergencja.v1';
 
 export const DEFAULTS = {
-  durationSec: 180,        // długość sesji: 3 minuty
-  tempoSec: 4,             // jeden pełny cykl (przybliżenie + cofnięcie)
+  durationSec: 180,               // długość sesji: 3 minuty
+  tempoSec: 4,                    // jeden pełny cykl (przybliżenie + cofnięcie)
   sound: true,
   vibrate: true,
   disclaimerAccepted: false,
+  trainingDays: [1, 2, 4, 5],     // dni treningowe: 0 = niedziela ... 6 = sobota
+  sessionsPerDay: 2,              // 1 lub 2 sesje dziennie (wyznacza godziny przypomnień)
 };
 
 function emptyData() {
-  return { version: 1, settings: { ...DEFAULTS }, sessions: [] };
+  return {
+    version: 1,
+    settings: { ...DEFAULTS, trainingDays: [...DEFAULTS.trainingDays] },
+    sessions: [],
+    measurements: [],
+  };
 }
 
 export function isValidSession(s) {
@@ -25,6 +32,26 @@ export function isValidSession(s) {
   );
 }
 
+// Pomiar punktu bliży zbieżności z linijki RAF (w cm).
+export function isValidMeasurement(m) {
+  return (
+    m &&
+    typeof m.id === 'string' &&
+    typeof m.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(m.date) &&
+    Number.isFinite(m.npcCm) && m.npcCm > 0 && m.npcCm <= 100
+  );
+}
+
+function sanitizeSettings(raw) {
+  const s = { ...DEFAULTS, ...raw };
+  const days = Array.isArray(s.trainingDays)
+    ? [...new Set(s.trainingDays.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort((a, b) => a - b)
+    : [];
+  s.trainingDays = days.length ? days : [...DEFAULTS.trainingDays];
+  s.sessionsPerDay = [1, 2].includes(s.sessionsPerDay) ? s.sessionsPerDay : DEFAULTS.sessionsPerDay;
+  return s;
+}
+
 export function loadData() {
   try {
     const raw = localStorage.getItem(KEY);
@@ -32,8 +59,11 @@ export function loadData() {
     const parsed = JSON.parse(raw);
     return {
       version: 1,
-      settings: { ...DEFAULTS, ...(parsed.settings || {}) },
+      settings: sanitizeSettings(parsed.settings || {}),
       sessions: Array.isArray(parsed.sessions) ? parsed.sessions.filter(isValidSession) : [],
+      measurements: Array.isArray(parsed.measurements)
+        ? parsed.measurements.filter(isValidMeasurement)
+        : [],
     };
   } catch {
     return emptyData();
@@ -59,7 +89,17 @@ export function deleteSession(data, id) {
   saveData(data);
 }
 
-// Dołącza sesje z pliku JSON (bez duplikatów po id). Zwraca liczbę dodanych.
+export function addMeasurement(data, measurement) {
+  data.measurements.push(measurement);
+  saveData(data);
+}
+
+export function deleteMeasurement(data, id) {
+  data.measurements = data.measurements.filter((m) => m.id !== id);
+  saveData(data);
+}
+
+// Dołącza sesje i pomiary z pliku JSON (bez duplikatów po id).
 export function importData(data, text) {
   let parsed;
   try {
@@ -69,15 +109,26 @@ export function importData(data, text) {
   }
   if (!parsed || !Array.isArray(parsed.sessions)) return { ok: false, added: 0 };
 
-  const known = new Set(data.sessions.map((s) => s.id));
   let added = 0;
+
+  const knownSessions = new Set(data.sessions.map((s) => s.id));
   for (const s of parsed.sessions) {
-    if (isValidSession(s) && !known.has(s.id)) {
+    if (isValidSession(s) && !knownSessions.has(s.id)) {
       data.sessions.push(s);
-      known.add(s.id);
+      knownSessions.add(s.id);
       added++;
     }
   }
+
+  const knownMeasurements = new Set(data.measurements.map((m) => m.id));
+  for (const m of Array.isArray(parsed.measurements) ? parsed.measurements : []) {
+    if (isValidMeasurement(m) && !knownMeasurements.has(m.id)) {
+      data.measurements.push(m);
+      knownMeasurements.add(m.id);
+      added++;
+    }
+  }
+
   saveData(data);
   return { ok: true, added };
 }

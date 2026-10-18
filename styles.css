@@ -224,3 +224,85 @@ body.training .toast { bottom: 24px; }
 }
 #chart .bar { fill: var(--accent); opacity: 0.85; }
 
+/* Plan tygodniowy */
+.plan {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 12px 0;
+}
+.plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.track {
+  height: 10px;
+  background: #1e2a45;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.plan p { margin: 10px 0 0; }
+
+/* Formularz pomiaru punktu bliży zbieżności */
+.npc-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 12px;
+}
+.npc-form input {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  min-width: 0;
+}
+.npc-form .btn { width: auto; margin: 0; }
+
+#npc-chart svg {
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 8px;
+  display: block;
+}
+#npc-chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+#npc-chart .dot { fill: var(--accent); }
+#npc-chart .grid { stroke: var(--line); stroke-width: 1; }
+#npc-chart text { fill: var(--muted); font-size: 11px; }
+
+/* Dni treningowe */
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e2a45;
+  border-radius: 999px;
+  padding: 8px 12px;
+  margin: 0;
+  cursor: pointer;
+}
+.chip input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+.radio-set { border: 0; padding: 0; margin: 12px 0; }
+.radio-set legend { color: var(--muted); padding: 0; margin-bottom: 6px; }
+

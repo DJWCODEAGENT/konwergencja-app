@@ -33,6 +33,16 @@
         <div><span id="stat-today">0</span><small>powtórzeń dziś</small></div>
         <div><span id="stat-week">0</span><small>sesji w 7 dni</small></div>
       </div>
+
+      <div class="plan">
+        <div class="plan-head">
+          <strong>Ten tydzień</strong>
+          <span id="week-text" class="muted small"></span>
+        </div>
+        <div class="track"><div id="week-fill" class="fill"></div></div>
+        <p id="today-text" class="muted small"></p>
+      </div>
+
       <p id="stat-last" class="muted small"></p>
       <button id="btn-start" class="btn primary big">Rozpocznij sesję</button>
       <p class="muted small">
@@ -58,9 +68,23 @@
     <!-- Historia -->
     <section data-screen="history" class="screen" hidden>
       <h1>Historia</h1>
+
       <h3>Powtórzenia z ostatnich 14 dni</h3>
       <div id="chart"></div>
       <p class="muted small">Najnowszy dzień po prawej.</p>
+
+      <h3>Punkt bliży zbieżności (linijka RAF, cm)</h3>
+      <form id="npc-form" class="npc-form">
+        <input id="npc-value" type="text" inputmode="decimal" placeholder="np. 12,5" aria-label="Wynik w cm" required>
+        <input id="npc-date" type="date" aria-label="Data pomiaru" required>
+        <button type="submit" class="btn primary small">Zapisz</button>
+      </form>
+      <div id="npc-chart"></div>
+      <p id="npc-empty" class="muted small" hidden>
+        Dodaj co najmniej 2 pomiary, aby zobaczyć wykres. Niższa wartość oznacza, że punkt jest bliżej nosa.
+      </p>
+      <ul id="npc-list" class="list"></ul>
+
       <h3>Sesje</h3>
       <ul id="session-list" class="list"></ul>
       <p id="history-empty" class="muted" hidden>Brak zapisanych sesji.</p>
@@ -80,6 +104,29 @@
 
       <label class="check"><input id="set-sound" type="checkbox"> Dźwięk rytmu</label>
       <label class="check"><input id="set-vibrate" type="checkbox"> Wibracja przy powtórzeniu</label>
+
+      <h3>Plan tygodniowy</h3>
+      <div class="days" role="group" aria-label="Dni treningowe">
+        <label class="chip"><input type="checkbox" data-day="1"> Pn</label>
+        <label class="chip"><input type="checkbox" data-day="2"> Wt</label>
+        <label class="chip"><input type="checkbox" data-day="3"> Śr</label>
+        <label class="chip"><input type="checkbox" data-day="4"> Cz</label>
+        <label class="chip"><input type="checkbox" data-day="5"> Pt</label>
+        <label class="chip"><input type="checkbox" data-day="6"> Sb</label>
+        <label class="chip"><input type="checkbox" data-day="0"> Nd</label>
+      </div>
+
+      <fieldset class="radio-set">
+        <legend>Sesje dziennie</legend>
+        <label class="check"><input type="radio" name="sessions" value="1"> 1 (przypomnienie o 9:00)</label>
+        <label class="check"><input type="radio" name="sessions" value="2"> 2 (przypomnienia o 9:00 i 19:00)</label>
+      </fieldset>
+
+      <button id="btn-ics" class="btn ghost">Dodaj przypomnienia do kalendarza (.ics)</button>
+      <p class="muted small">
+        Otwórz pobrany plik w aplikacji Kalendarz. Przypomnienia powtarzają się co tydzień.
+        Po zmianie planu wyeksportuj plik ponownie.
+      </p>
 
       <h3>Dane</h3>
       <button id="btn-export" class="btn ghost">Eksportuj dane (JSON)</button>
