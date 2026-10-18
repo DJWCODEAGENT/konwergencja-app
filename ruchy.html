@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <title>Ruchy gałek</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <p><a href="index.html" class="muted small">← Wróć do treningu</a></p>
+    <h1>Ruchy gałek</h1>
+
+    <p class="muted small">
+      Ćwiczenie higieny oka, a nie treningu konwergencji. Ruszaj tylko oczami, głowa ma być nieruchoma.
+      Przerwij przy zawrotach głowy, bólu lub podwójnym widzeniu.
+    </p>
+
+    <section id="setup">
+      <label>Czas ćwiczenia: <output id="out-minutes">3</output> min
+        <input id="set-minutes" type="range" min="1" max="10" step="1" value="3">
+      </label>
+      <label class="check"><input id="set-vibrate" type="checkbox" checked> Wibracja</label>
+
+      <p class="muted small">
+        Kolejność: w prawo, w lewo, w górę, w dół, potem cztery przekątne. Każdy kierunek 4 razy:
+        wyjście z centrum i mrugnięcie, powrót do centrum i mrugnięcie.
+      </p>
+
+      <button id="btn-start" class="btn primary big">Start</button>
+    </section>
+
+    <section id="run" class="train" hidden>
+      <div class="train-head">
+        <span id="r-time">00:00</span>
+        <span id="r-step" class="small muted"></span>
+      </div>
+      <p id="r-cue" class="cue" aria-live="polite">Wróć do środka</p>
+
+      <svg id="eye" viewBox="0 0 320 200" role="img" aria-label="Animacja oka poruszającego się w różne strony">
+        <defs>
+          <clipPath id="eyeClip">
+            <ellipse cx="160" cy="100" rx="140" ry="80"/>
+          </clipPath>
+        </defs>
+        <ellipse cx="160" cy="100" rx="140" ry="80" fill="#f1f5f9"/>
+        <g clip-path="url(#eyeClip)">
+          <g id="gaze">
+            <circle cx="160" cy="100" r="44" fill="#0d9488"/>
+            <circle cx="160" cy="100" r="18" fill="#06201c"/>
+            <circle cx="172" cy="86" r="6" fill="#ffffff" opacity="0.8"/>
+          </g>
+          <rect id="lid-top" x="0" y="0" width="320" height="0" fill="#0b1220"/>
+          <rect id="lid-bottom" x="0" y="200" width="320" height="0" fill="#0b1220"/>
+        </g>
+        <ellipse cx="160" cy="100" rx="140" ry="80" fill="none" stroke="#2a3858" stroke-width="3"/>
+      </svg>
+
+      <p id="r-info" class="muted small"></p>
+      <button id="btn-stop" class="btn ghost">Zakończ</button>
+    </section>
+
+    <p id="done" class="notice" hidden></p>
+  </main>
+
+  <script type="module" src="ruchy.js"></script>
+</body>
+</html>

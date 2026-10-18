@@ -306,6 +306,15 @@ body.training .toast { bottom: 24px; }
 .radio-set { border: 0; padding: 0; margin: 12px 0; }
 .radio-set legend { color: var(--muted); padding: 0; margin-bottom: 6px; }
 
+/* Animacja oka (strona Ruchy gałek) */
+#eye {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  display: block;
+  margin: 12px auto;
+}
+
 /* Wybór ćwiczenia */
 select {
   display: block;
