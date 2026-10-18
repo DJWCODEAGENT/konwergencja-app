@@ -147,6 +147,38 @@ function renderHome() {
   $('#today-text').textContent = isTrainingDayToday()
     ? `Dziś zaplanowano ${perDay} ${perDay === 1 ? 'sesję' : 'sesje'}. Wykonano: ${sessionsToday()}.`
     : 'Dziś dzień bez treningu.';
+
+  renderCheckup();
+}
+
+// ---------- wizyta kontrolna ----------
+// W badaniu MobileS pomiary robiono w tygodniach 0, 4 i 8, więc przypomnienie co 4 tygodnie.
+const CHECKUP_INTERVAL_DAYS = 28;
+
+// Różnica w dniach między datą w formacie RRRR-MM-DD a dzisiaj.
+function daysSinceDateKey(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  const then = new Date(y, m - 1, d);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.floor((today - then) / (24 * 60 * 60 * 1000));
+}
+
+function renderCheckup() {
+  const last = data.measurements.reduce((m, p) => (!m || p.date > m.date ? p : m), null);
+  let text = null;
+
+  if (!last) {
+    text = 'Nie masz jeszcze pomiaru punktu bliży zbieżności. Zmierz go linijką RAF i umów wizytę kontrolną u specjalisty.';
+  } else {
+    const days = daysSinceDateKey(last.date);
+    if (days >= CHECKUP_INTERVAL_DAYS) {
+      text = `Od ostatniego pomiaru (${last.date}) minęło ${days} dni. Umów kontrolę u ortoptysty lub optometrysty.`;
+    }
+  }
+
+  $('#checkup-card').hidden = text === null;
+  if (text) $('#checkup-text').textContent = text;
 }
 
 // ---------- trening ----------
@@ -212,7 +244,7 @@ function addRep() {
   vibrate();
 }
 
-function finishTraining() {
+function finishTraining({ safety = false } = {}) {
   if (!run) return;
   clearInterval(timer);
   timer = null;
@@ -233,6 +265,7 @@ function finishTraining() {
       durationSec: seconds,
       reps,
       tempoSec: data.settings.tempoSec,
+      stoppedForSafety: safety,
     });
   }
 
@@ -260,7 +293,8 @@ function renderHistory() {
     const title = document.createElement('strong');
     title.textContent = fmtDate(s.startedAt);
     const meta = document.createElement('small');
-    meta.textContent = `${s.reps} powt. · ${fmtTime(s.durationSec * 1000)}`;
+    meta.textContent = `${s.reps} powt. · ${fmtTime(s.durationSec * 1000)}`
+      + (s.stoppedForSafety ? ' · przerwano ze względów bezpieczeństwa' : '');
     info.append(title, meta);
 
     const del = document.createElement('button');
@@ -462,7 +496,13 @@ $$('[data-nav]').forEach((b) => b.addEventListener('click', () => show(b.dataset
 
 $('#btn-start').addEventListener('click', startTraining);
 $('#btn-rep').addEventListener('click', addRep);
-$('#btn-stop').addEventListener('click', finishTraining);
+$('#btn-stop').addEventListener('click', () => finishTraining());
+
+$('#btn-safety').addEventListener('click', () => {
+  finishTraining({ safety: true });
+  $('#safety').hidden = false;
+});
+$('#safety-ok').addEventListener('click', () => ($('#safety').hidden = true));
 
 $('#npc-form').addEventListener('submit', (e) => {
   e.preventDefault();

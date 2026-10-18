@@ -25,6 +25,16 @@
     </div>
   </div>
 
+  <!-- Przerwanie ćwiczenia ze względów bezpieczeństwa -->
+  <div id="safety" class="overlay" hidden>
+    <div class="card">
+      <h2>Przerwano ćwiczenie</h2>
+      <p>Jeśli ból, zawroty głowy lub podwójne widzenie nie ustąpią po odpoczynku, skontaktuj się z lekarzem okulistą lub ortoptystą.</p>
+      <p>Przy nagłym pogorszeniu wzroku lub silnym bólu oka zgłoś się od razu do lekarza.</p>
+      <button id="safety-ok" class="btn primary big">Rozumiem</button>
+    </div>
+  </div>
+
   <main>
     <!-- Ekran startowy -->
     <section data-screen="home" class="screen">
@@ -43,8 +53,16 @@
         <p id="today-text" class="muted small"></p>
       </div>
 
+      <div id="checkup-card" class="notice" hidden>
+        <strong>Czas na wizytę kontrolną</strong>
+        <p id="checkup-text" class="small"></p>
+      </div>
+
       <p id="stat-last" class="muted small"></p>
       <button id="btn-start" class="btn primary big">Rozpocznij sesję</button>
+      <p class="muted small">
+        <strong>Przerwij ćwiczenie</strong>, jeśli pojawi się ból, zawroty głowy lub uporczywe podwójne widzenie.
+      </p>
       <p class="muted small">
         Przybliżaj ołówek (lub telefon) do nosa w rytmie kółka. Gdy wykonasz pełne przybliżenie, naciśnij „+1”.
       </p>
@@ -62,6 +80,7 @@
       </div>
       <p class="muted small">Kółko rośnie: przybliżaj. Kółko maleje: cofaj.</p>
       <button id="btn-rep" class="btn primary big">+1 powtórzenie</button>
+      <button id="btn-safety" class="btn danger">Ból, zawroty lub podwójne widzenie – przerwij</button>
       <button id="btn-stop" class="btn ghost">Zakończ</button>
     </section>
 

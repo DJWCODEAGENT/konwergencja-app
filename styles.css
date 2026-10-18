@@ -306,3 +306,13 @@ body.training .toast { bottom: 24px; }
 .radio-set { border: 0; padding: 0; margin: 12px 0; }
 .radio-set legend { color: var(--muted); padding: 0; margin-bottom: 6px; }
 
+/* Ostrzeżenia i przypomnienia */
+.notice {
+  background: #2a2010;
+  border: 1px solid #b45309;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+.notice p { margin: 6px 0 0; color: var(--text); }
+
