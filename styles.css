@@ -306,6 +306,19 @@ body.training .toast { bottom: 24px; }
 .radio-set { border: 0; padding: 0; margin: 12px 0; }
 .radio-set legend { color: var(--muted); padding: 0; margin-bottom: 6px; }
 
+/* Wybór ćwiczenia */
+select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+}
+
 /* Ostrzeżenia i przypomnienia */
 .notice {
   background: #2a2010;

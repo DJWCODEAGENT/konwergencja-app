@@ -15,6 +15,7 @@ let timer = null;     // interwał: czas, dźwięk, koniec sesji
 let frameId = null;   // pętla klatek: rozmiar kółka i podpis
 let wakeLock = null;  // blokada wygaszania ekranu
 let audioCtx = null;
+let chosenExerciseId = null; // ćwiczenie wybrane na ekranie startowym
 
 // ---------- pomocnicze ----------
 const pad = (n) => String(n).padStart(2, '0');
@@ -117,6 +118,114 @@ function isTrainingDayToday() {
   return data.settings.trainingDays.includes(new Date().getDay());
 }
 
+// ---------- ćwiczenia i osiągnięcia ----------
+// Ćwiczenia różnią się tempem i formą. Kolejne sesje rotują między nimi.
+const EXERCISES = [
+  { id: 'circle', name: 'Kółko', tempo: 1, visual: true,
+    desc: 'Przybliżaj, gdy kółko rośnie, cofaj, gdy maleje.' },
+  { id: 'fast', name: 'Szybkie cykle', tempo: 0.5, visual: true,
+    desc: 'Ten sam rytm, dwa razy szybciej. Więcej zmian kierunku w jednej minucie.' },
+  { id: 'slow', name: 'Wolne cykle', tempo: 1.5, visual: true,
+    desc: 'Dłuższe przybliżanie i cofanie, z pełnym skupieniem na każdym cyklu.' },
+  { id: 'pencil', name: 'Ołówek', tempo: 1, visual: false,
+    desc: 'Ołówek na wyciągnięcie ręki. Przybliżaj do nosa na dźwięk, cofaj na kolejny. Telefon działa jako metronom.' },
+];
+
+const BADGES = [
+  { id: 'first', title: 'Pierwsza sesja', test: (c) => c.sessions >= 1 },
+  { id: 'week', title: '7 dni z rzędu', test: (c) => c.longestStreak >= 7 },
+  { id: 'month', title: '30 dni z rzędu', test: (c) => c.longestStreak >= 30 },
+  { id: 'reps100', title: '100 powtórzeń łącznie', test: (c) => c.reps >= 100 },
+  { id: 'reps1000', title: '1000 powtórzeń łącznie', test: (c) => c.reps >= 1000 },
+  { id: 'variety', title: 'Wszystkie ćwiczenia', test: (c) => EXERCISES.every((e) => c.exercises.has(e.id)) },
+];
+
+// Sesje zapisane przed dodaniem ćwiczeń traktujemy jako „Kółko”.
+const exerciseOf = (id) => EXERCISES.find((e) => e.id === (id ?? 'circle')) ?? EXERCISES[0];
+
+function nextExerciseId() {
+  const last = data.sessions.reduce((m, s) => (!m || s.startedAt > m.startedAt ? s : m), null);
+  if (!last) return EXERCISES[0].id;
+  const idx = EXERCISES.findIndex((e) => e.id === exerciseOf(last.exerciseId).id);
+  return EXERCISES[(idx + 1) % EXERCISES.length].id;
+}
+
+// Seria: ile dni z rzędu z sesją, licząc od dziś (a gdy dziś jeszcze nie ćwiczono, od wczoraj).
+function currentStreak() {
+  const days = new Set(data.sessions.map((s) => dayKey(s.startedAt)));
+  const d = new Date();
+  if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (days.has(dayKey(d))) {
+    n++;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
+
+// Najdłuższa seria w historii (odznaki nie znikają po przerwie).
+function longestStreak() {
+  const keys = [...new Set(data.sessions.map((s) => dayKey(s.startedAt)))].sort();
+  const utc = (k) => {
+    const [y, m, d] = k.split('-').map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  let best = 0;
+  let run = 0;
+  let prev = null;
+  for (const k of keys) {
+    run = prev !== null && utc(k) - utc(prev) === 24 * 60 * 60 * 1000 ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = k;
+  }
+  return best;
+}
+
+function achievementStats() {
+  return {
+    sessions: data.sessions.length,
+    reps: data.sessions.reduce((sum, s) => sum + s.reps, 0),
+    longestStreak: longestStreak(),
+    exercises: new Set(data.sessions.map((s) => exerciseOf(s.exerciseId).id)),
+  };
+}
+
+function renderStreak() {
+  const n = currentStreak();
+  $('#streak-text').textContent = n > 0
+    ? `Seria: ${n} ${n === 1 ? 'dzień' : 'dni'} z rzędu.`
+    : 'Zacznij serię: wystarczy jedna sesja dziennie.';
+}
+
+function renderExercise() {
+  const select = $('#exercise');
+  if (!chosenExerciseId) chosenExerciseId = nextExerciseId();
+  if (select.options.length === 0) {
+    for (const e of EXERCISES) select.append(new Option(e.name, e.id));
+  }
+  select.value = chosenExerciseId;
+  $('#exercise-desc').textContent = exerciseOf(chosenExerciseId).desc;
+}
+
+function renderBadges() {
+  const stats = achievementStats();
+  const list = $('#badge-list');
+  list.replaceChildren();
+  for (const b of BADGES) {
+    const earned = b.test(stats);
+    const li = document.createElement('li');
+    li.style.opacity = earned ? '1' : '0.5';
+    const info = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = b.title;
+    const meta = document.createElement('small');
+    meta.textContent = earned ? 'Zdobyte' : 'Jeszcze nie';
+    info.append(title, meta);
+    li.append(info);
+    list.append(li);
+  }
+}
+
 // ---------- ekran startowy ----------
 function renderHome() {
   const now = Date.now();
@@ -149,6 +258,8 @@ function renderHome() {
     : 'Dziś dzień bez treningu.';
 
   renderCheckup();
+  renderStreak();
+  renderExercise();
 }
 
 // ---------- wizyta kontrolna ----------
@@ -184,14 +295,22 @@ function renderCheckup() {
 // ---------- trening ----------
 async function startTraining() {
   unlockAudio();
+  const ex = exerciseOf(chosenExerciseId);
   run = {
     startedAt: Date.now(),
     durationMs: data.settings.durationSec * 1000,
+    tempoMs: Math.round(data.settings.tempoSec * 1000 * ex.tempo),
+    exercise: ex,
     reps: 0,
     lastCycle: -1,
   };
 
   $('#train-count').textContent = '0';
+  $('#stage').hidden = !ex.visual;
+  $('#train-hint').textContent = ex.visual
+    ? 'Kółko rośnie: przybliżaj. Kółko maleje: cofaj.'
+    : 'Rytm dźwięku: przybliżaj, potem cofaj.';
+  $('#cue').textContent = 'Przybliżaj';
   show('train');
 
   try {
@@ -200,14 +319,14 @@ async function startTraining() {
 
   tick();
   timer = setInterval(tick, 200);
-  frameId = requestAnimationFrame(frame);
+  if (ex.visual) frameId = requestAnimationFrame(frame);
 }
 
 // Rozmiar kółka i podpis liczone z czasu, płynnie co klatkę.
 // Faza 0..0.5 – kółko rośnie (przybliżaj), 0.5..1 – maleje (cofaj).
 function frame() {
   if (!run) return;
-  const tempoMs = data.settings.tempoSec * 1000;
+  const tempoMs = run.tempoMs;
   const phase = ((Date.now() - run.startedAt) % tempoMs) / tempoMs;
   const t = phase < 0.5 ? phase * 2 : (1 - phase) * 2; // 0 → 1 → 0
   const size = 0.25 + 0.75 * t;
@@ -228,10 +347,12 @@ function tick() {
   $('#train-time').textContent = fmtTime(Math.max(0, left));
 
   // Dźwięk na początku każdego cyklu (rytm dla telefonu i ołówka).
-  const cycle = Math.floor(elapsed / (data.settings.tempoSec * 1000));
+  const cycle = Math.floor(elapsed / run.tempoMs);
   if (cycle !== run.lastCycle) {
     run.lastCycle = cycle;
     beep();
+    // Bez kółka (ołówek) podpis zmienia się wraz z rytmem dźwięku.
+    if (!run.exercise.visual) $('#cue').textContent = cycle % 2 === 0 ? 'Przybliżaj' : 'Cofaj';
   }
 
   if (left <= 0) finishTraining();
@@ -264,12 +385,14 @@ function finishTraining({ safety = false } = {}) {
       startedAt: new Date(run.startedAt).toISOString(),
       durationSec: seconds,
       reps,
-      tempoSec: data.settings.tempoSec,
+      tempoSec: run.tempoMs / 1000,
+      exerciseId: run.exercise.id,
       stoppedForSafety: safety,
     });
   }
 
   run = null;
+  chosenExerciseId = null; // po sesji na ekranie startowym wraca rotacja
   vibrate([80, 60, 80]);
   show('home');
   toast(saved ? `Zapisano: ${reps} powtórzeń` : 'Sesja za krótka, nie zapisano');
@@ -280,6 +403,7 @@ function renderHistory() {
   renderChart();
   renderNpcList();
   renderNpcChart();
+  renderBadges();
 
   const list = $('#session-list');
   list.replaceChildren();
@@ -293,7 +417,7 @@ function renderHistory() {
     const title = document.createElement('strong');
     title.textContent = fmtDate(s.startedAt);
     const meta = document.createElement('small');
-    meta.textContent = `${s.reps} powt. · ${fmtTime(s.durationSec * 1000)}`
+    meta.textContent = `${exerciseOf(s.exerciseId).name} · ${s.reps} powt. · ${fmtTime(s.durationSec * 1000)}`
       + (s.stoppedForSafety ? ' · przerwano ze względów bezpieczeństwa' : '');
     info.append(title, meta);
 
@@ -495,6 +619,10 @@ function buildIcs() {
 $$('[data-nav]').forEach((b) => b.addEventListener('click', () => show(b.dataset.nav)));
 
 $('#btn-start').addEventListener('click', startTraining);
+$('#exercise').addEventListener('change', (e) => {
+  chosenExerciseId = e.target.value;
+  renderExercise();
+});
 $('#btn-rep').addEventListener('click', addRep);
 $('#btn-stop').addEventListener('click', () => finishTraining());
 
