@@ -3,11 +3,21 @@
 
 const $ = (sel) => document.querySelector(sel);
 
-const MOVE_MS = 450;   // czas ruchu gałki
-const HOLD_MS = 350;   // chwila zatrzymania w punkcie
-const BLINK_MS = 300;  // mrugnięcie
-const STEP_MS = MOVE_MS + HOLD_MS + BLINK_MS;
-const REPS = 4;
+// Tryb szybki to dotychczasowe tempo, normalny i wolny są wolniejsze.
+const BASE_MS = { move: 450, hold: 350, blink: 300 };
+const MODE_FACTOR = { szybki: 1, normalny: 1.5, wolny: 2 };
+let MOVE_MS = BASE_MS.move;   // czas ruchu gałki
+let HOLD_MS = BASE_MS.hold;   // chwila zatrzymania w punkcie
+let BLINK_MS = BASE_MS.blink; // mrugnięcie
+let STEP_MS = MOVE_MS + HOLD_MS + BLINK_MS;
+
+function setMode(mode) {
+  const f = MODE_FACTOR[mode] ?? 1;
+  MOVE_MS = Math.round(BASE_MS.move * f);
+  HOLD_MS = Math.round(BASE_MS.hold * f);
+  BLINK_MS = Math.round(BASE_MS.blink * f);
+  STEP_MS = MOVE_MS + HOLD_MS + BLINK_MS;
+}
 const MAX_X = 70;      // maksymalne przesunięcie tęczówki w poziomie (px SVG)
 const MAX_Y = 30;      // maksymalne przesunięcie tęczówki w pionie (px SVG)
 
@@ -18,18 +28,16 @@ const DIRS = {
 };
 const ORDER = ['right', 'left', 'up', 'down', 'ul', 'ur', 'dl', 'dr'];
 const LABELS = {
-  center: 'Wróć do środka',
+  center: 'Środek',
   right: 'W prawo', left: 'W lewo', up: 'W górę', down: 'W dół',
   ul: 'W lewą górę', ur: 'W prawą górę', dl: 'W lewy dół', dr: 'W prawy dół',
 };
 
-// Jeden obieg: dla każdego kierunku 4 powtórzenia (kierunek, potem powrót do środka).
+// Jeden obieg: środek, kierunek, środek, kolejny kierunek... (każdy kierunek raz).
 const SEQUENCE = [];
 for (const dir of ORDER) {
-  for (let rep = 1; rep <= REPS; rep++) {
-    SEQUENCE.push({ dir, rep, to: DIRS[dir] });
-    SEQUENCE.push({ dir: 'center', rep, to: CENTER });
-  }
+  SEQUENCE.push({ dir: 'center', to: CENTER });
+  SEQUENCE.push({ dir, to: DIRS[dir] });
 }
 
 let frameId = null;
@@ -66,7 +74,7 @@ function draw(p, blink) {
 
 function startStep(step) {
   $('#r-cue').textContent = LABELS[step.dir];
-  $('#r-step').textContent = step.dir === 'center' ? `Powrót ${step.rep} z ${REPS}` : `Powtórzenie ${step.rep} z ${REPS}`;
+  $('#r-step').textContent = `Krok ${idx + 1} z ${SEQUENCE.length}`;
   $('#r-info').textContent = `Obieg ${cycles + 1}`;
   vibrate(20); // krótki impuls na start ruchu
 }
@@ -109,6 +117,7 @@ function frame(now) {
 async function start() {
   minutes = Number($('#set-minutes').value);
   vibrateOn = $('#set-vibrate').checked;
+  setMode($('input[name="mode"]:checked').value);
   idx = -1;
   stepStart = -Infinity;
   from = CENTER;

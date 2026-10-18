@@ -23,11 +23,18 @@
       <label>Czas ćwiczenia: <output id="out-minutes">3</output> min
         <input id="set-minutes" type="range" min="1" max="10" step="1" value="3">
       </label>
+      <fieldset class="radio-set">
+        <legend>Tempo</legend>
+        <label class="check"><input type="radio" name="mode" value="wolny"> Wolny</label>
+        <label class="check"><input type="radio" name="mode" value="normalny"> Normalny</label>
+        <label class="check"><input type="radio" name="mode" value="szybki" checked> Szybki (obecne tempo)</label>
+      </fieldset>
+
       <label class="check"><input id="set-vibrate" type="checkbox" checked> Wibracja</label>
 
       <p class="muted small">
-        Kolejność: w prawo, w lewo, w górę, w dół, potem cztery przekątne. Każdy kierunek 4 razy:
-        wyjście z centrum i mrugnięcie, powrót do centrum i mrugnięcie.
+        Kolejność: środek, w prawo, środek, w lewo, środek, w górę, środek, w dół, potem cztery przekątne,
+        zawsze z powrotem do środka. Po każdym ruchu mrugnięcie.
       </p>
 
       <button id="btn-start" class="btn primary big">Start</button>
