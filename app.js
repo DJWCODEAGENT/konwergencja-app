@@ -603,6 +603,8 @@ function renderSettings() {
   $('#set-sound').checked = s.sound;
   $('#set-vibrate').checked = s.vibrate;
   $('#set-ask-measure').checked = !!s.askMeasurement;
+  $('#set-fixation').value = s.fixationSize;
+  $('#out-fixation').textContent = s.fixationSize;
 
   for (const cb of $$('[data-day]')) cb.checked = s.trainingDays.includes(Number(cb.dataset.day));
   for (const r of $$('input[name="sessions"]')) r.checked = Number(r.value) === s.sessionsPerDay;
@@ -747,6 +749,14 @@ $('#set-tempo').addEventListener('input', (e) => {
 $('#set-sound').addEventListener('change', (e) => updateSetting('sound', e.target.checked));
 $('#set-vibrate').addEventListener('change', (e) => updateSetting('vibrate', e.target.checked));
 $('#set-ask-measure').addEventListener('change', (e) => updateSetting('askMeasurement', e.target.checked));
+$('#set-fixation').addEventListener('input', (e) => {
+  const px = Number(e.target.value);
+  $('#out-fixation').textContent = px;
+  document.documentElement.style.setProperty('--fixation', `${px}px`);
+  updateSetting('fixationSize', px);
+});
+// Rozmiar punktu z zapisanych ustawień (po wejściu do aplikacji).
+document.documentElement.style.setProperty('--fixation', `${data.settings.fixationSize ?? 22}px`);
 for (const r of $$('input[name="approach"]')) {
   r.addEventListener('change', (e) => {
     if (e.target.checked) updateSetting('approachSpeed', e.target.value);

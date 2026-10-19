@@ -12,6 +12,7 @@ export const DEFAULTS = {
   sessionsPerDay: 2,              // 1 lub 2 sesje dziennie (wyznacza godziny przypomnień)
   approachSpeed: 'szybki',        // tempo przybliżania w trybie „Ołówek na telefonie”: wolny, normalny, szybki
   askMeasurement: false,          // pytać o odległość po „Widzę podwójnie” (domyślnie nie)
+  fixationSize: 22,               // rozmiar ostrego punktu w px (12–60)
 };
 
 function emptyData() {

@@ -292,8 +292,8 @@ body.training .toast { top: auto; bottom: 200px; }
 }
 /* Ostry punkt do fiksacji: stały, bez animacji, żeby było na czym skupić wzrok. */
 .fixation {
-  width: 22px;
-  height: 22px;
+  width: var(--fixation, 22px);
+  height: var(--fixation, 22px);
   border-radius: 50%;
   background: #ffffff;
   box-shadow: 0 0 0 4px var(--accent);
