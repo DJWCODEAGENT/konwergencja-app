@@ -145,6 +145,9 @@ const EXERCISES = [
 
 const DEFAULT_EXERCISE = 'focus';
 
+// Mnożnik tempa przybliżania (tylko tryb „Ołówek na telefonie”): większy = wolniej.
+const APPROACH = { wolny: 2, normalny: 1.5, szybki: 1 };
+
 const BADGES = [
   { id: 'first', title: 'Pierwsza sesja', test: (c) => c.sessions >= 1 },
   { id: 'week', title: '7 dni z rzędu', test: (c) => c.longestStreak >= 7 },
@@ -227,6 +230,12 @@ function renderExercise() {
     b.setAttribute('aria-checked', String(on));
   }
   $('#exercise-desc').textContent = exerciseOf(chosenExerciseId).desc;
+
+  // Tempo przybliżania pokazujemy tylko przy trybie z punktem.
+  $('#approach').hidden = chosenExerciseId !== 'focus';
+  for (const r of $$('input[name="approach"]')) {
+    r.checked = r.value === data.settings.approachSpeed;
+  }
 }
 
 function renderBadges() {
@@ -311,7 +320,10 @@ async function startTraining() {
   run = {
     startedAt: Date.now(),
     durationMs: data.settings.durationSec * 1000,
-    tempoMs: Math.round(data.settings.tempoSec * 1000 * ex.tempo),
+    tempoMs: Math.round(
+      data.settings.tempoSec * 1000 * ex.tempo
+      * (ex.kind === 'focus' ? APPROACH[data.settings.approachSpeed] ?? 1 : 1)
+    ),
     exercise: ex,
     reps: 0,
     lastCycle: -1,
@@ -579,6 +591,7 @@ function renderSettings() {
   $('#out-tempo').textContent = s.tempoSec;
   $('#set-sound').checked = s.sound;
   $('#set-vibrate').checked = s.vibrate;
+  $('#set-ask-measure').checked = !!s.askMeasurement;
 
   for (const cb of $$('[data-day]')) cb.checked = s.trainingDays.includes(Number(cb.dataset.day));
   for (const r of $$('input[name="sessions"]')) r.checked = Number(r.value) === s.sessionsPerDay;
@@ -657,6 +670,7 @@ $('#safety-ok').addEventListener('click', () => ($('#safety').hidden = true));
 // Widzę podwójnie: zapisz sesję i poproś o odległość w cm (ten wynik to punkt bliży zbieżności).
 $('#btn-double').addEventListener('click', () => {
   finishTraining();
+  if (!data.settings.askMeasurement) return; // domyślnie bez pytania, sesja i tak jest zapisana
   $('#double-cm').value = '';
   $('#double').hidden = false;
   $('#double-cm').focus();
@@ -705,6 +719,12 @@ $('#set-tempo').addEventListener('input', (e) => {
 });
 $('#set-sound').addEventListener('change', (e) => updateSetting('sound', e.target.checked));
 $('#set-vibrate').addEventListener('change', (e) => updateSetting('vibrate', e.target.checked));
+$('#set-ask-measure').addEventListener('change', (e) => updateSetting('askMeasurement', e.target.checked));
+for (const r of $$('input[name="approach"]')) {
+  r.addEventListener('change', (e) => {
+    if (e.target.checked) updateSetting('approachSpeed', e.target.value);
+  });
+}
 
 for (const cb of $$('[data-day]')) {
   cb.addEventListener('change', (e) => {

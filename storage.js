@@ -10,6 +10,8 @@ export const DEFAULTS = {
   disclaimerAccepted: false,
   trainingDays: [1, 2, 4, 5],     // dni treningowe: 0 = niedziela ... 6 = sobota
   sessionsPerDay: 2,              // 1 lub 2 sesje dziennie (wyznacza godziny przypomnień)
+  approachSpeed: 'szybki',        // tempo przybliżania w trybie „Ołówek na telefonie”: wolny, normalny, szybki
+  askMeasurement: false,          // pytać o odległość po „Widzę podwójnie” (domyślnie nie)
 };
 
 function emptyData() {
