@@ -35,28 +35,12 @@ main {
   padding: 20px 16px;
 }
 
-h1 { font-size: 1.6rem; margin: 8px 0 16px; }
+h1 { font-size: 1.35rem; margin: 8px 0 20px; letter-spacing: -0.01em; }
 h2 { margin-top: 0; }
 h3 { margin: 24px 0 8px; font-size: 1rem; color: var(--muted); font-weight: 600; }
 
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
-
-/* Statystyki na ekranie startowym */
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 8px 0 12px;
-}
-.stats div {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 18px;
-  text-align: center;
-}
-.stats span { display: block; font-size: 2.2rem; font-weight: 700; color: var(--accent); }
-.stats small { color: var(--muted); }
 
 /* Przyciski */
 .btn {
@@ -118,13 +102,19 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 }
 .tabbar button {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   background: none;
   border: 0;
   color: var(--muted);
-  padding: 14px 0;
+  padding: 10px 0 12px;
   font: inherit;
+  font-size: 0.75rem;
   font-weight: 600;
 }
+.tabbar svg { width: 22px; height: 22px; }
 .tabbar button.active { color: var(--accent); }
 body.training .tabbar { display: none; }
 
@@ -224,34 +214,6 @@ body.training .toast { bottom: 24px; }
 }
 #chart .bar { fill: var(--accent); opacity: 0.85; }
 
-/* Plan tygodniowy */
-.plan {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin: 12px 0;
-}
-.plan-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 10px;
-}
-.track {
-  height: 10px;
-  background: #1e2a45;
-  border-radius: 999px;
-  overflow: hidden;
-}
-.fill {
-  height: 100%;
-  width: 0;
-  background: var(--accent);
-  border-radius: 999px;
-  transition: width 0.3s ease;
-}
-.plan p { margin: 10px 0 0; }
-
 /* Formularz pomiaru punktu bliży zbieżności */
 .npc-form {
   display: grid;
@@ -315,40 +277,143 @@ body.training .toast { bottom: 24px; }
   margin: 12px auto;
 }
 
-/* Ekran startowy: karty i podpowiedzi */
+/* Ekran startowy */
 .field-label { display: block; color: var(--muted); font-size: 0.9rem; margin: 0 0 6px; }
-.box {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin: 12px 0;
+
+.hero { text-align: center; margin: 0 0 28px; }
+.ring {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
 }
-.box select { margin-bottom: 4px; }
-.hint { color: var(--muted); font-size: 0.9rem; margin: 6px 0 12px; min-height: 2.4em; }
-.center { text-align: center; margin: 8px 0 0; }
-.tips {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  margin: 12px 0;
+.ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-track, .ring-fill { fill: none; stroke-width: 10; }
+.ring-track { stroke: #17213a; }
+.ring-fill {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 628.32;
+  stroke-dashoffset: 628.32;
+  transition: stroke-dashoffset 0.6s ease;
 }
-.tips summary { cursor: pointer; font-weight: 600; color: var(--accent); }
-.tips ul { padding-left: 18px; margin: 10px 0 4px; color: var(--muted); }
-.tips li { margin: 6px 0; }
-.link-card {
+.start {
+  width: 150px;
+  height: 150px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(45, 212, 191, 0.22);
+}
+.start:active { transform: scale(0.97); animation: none; }
+/* Delikatne „oddychanie” przycisku, jak kółko w ćwiczeniu. Wyłączone przy ograniczonym ruchu. */
+@media (prefers-reduced-motion: no-preference) {
+  .start { animation: breathe 6s ease-in-out infinite; }
+}
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+.hero-line { font-weight: 600; margin: 0; }
+.hero .muted { margin: 4px 0 0; }
+
+/* Wybór ćwiczenia: dwie równe kolumny, żeby nic nie wisiało samotnie w ostatnim rzędzie */
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 12px; }
+.chip-btn {
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: pointer;
+}
+.chip-btn.on { background: #12302f; border-color: var(--accent); color: var(--accent); font-weight: 600; }
+/* Stała wysokość na dwie linie, żeby zmiana ćwiczenia nie przesuwała reszty ekranu */
+.hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  max-width: 36ch;
+  min-height: 2.8em;
+  margin: 0 auto 20px;
+}
+
+.glance {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 0 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.glance div { padding: 14px 4px; text-align: center; }
+.glance div + div { border-left: 1px solid var(--line); }
+.glance dt { color: var(--muted); font-size: 0.8rem; margin-bottom: 2px; }
+.glance dd { margin: 0; font-size: 1.2rem; font-weight: 700; }
+
+/* Przypomnienie o kontroli: spokojny panel, tekst nad linkiem zamiast trzech linii obok przycisku */
+.checkup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  margin: 0 0 16px;
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  font-size: 0.9rem;
+}
+.checkup .dot { flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: #f59e0b; }
+.checkup p { margin: 0; line-height: 1.45; }
+.textbtn {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 0 0;
+  cursor: pointer;
+}
+
+/* Widoczny fokus dla klawiatury */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.start:focus-visible { outline-offset: 6px; }
+
+.rows { margin: 4px 0 0; }
+.row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin: 12px 0;
+  padding: 14px 2px;
   color: var(--text);
   text-decoration: none;
+  border-bottom: 1px solid var(--line);
 }
-.link-card small { display: block; color: var(--muted); margin-top: 2px; }
-.link-card span[aria-hidden] { color: var(--accent); font-size: 1.4rem; }
+.row small { display: block; color: var(--muted); margin-top: 2px; }
+.row > svg { color: var(--muted); flex: none; }
+details.row { display: block; }
+details.row summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+details.row summary::-webkit-details-marker { display: none; }
+details.row summary::after { content: '+'; color: var(--muted); font-size: 1.3rem; line-height: 1; }
+details.row[open] summary::after { content: '\2013'; }
+details.row ul { padding-left: 18px; margin: 10px 0 2px; color: var(--muted); }
+details.row li { margin: 6px 0; }
 
 /* Kafelki trybów z ikonami */
 .mode-grid {
@@ -378,19 +443,6 @@ body.training .toast { bottom: 24px; }
 .mode:has(input:checked) { border-color: var(--accent); background: #112a33; }
 .mode:has(input:checked) svg { color: var(--accent); }
 .mode:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* Wybór ćwiczenia */
-select {
-  display: block;
-  width: 100%;
-  margin-top: 6px;
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  font: inherit;
-}
 
 /* Ostrzeżenia i przypomnienia */
 .notice {

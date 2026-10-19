@@ -124,11 +124,11 @@ const EXERCISES = [
   { id: 'circle', name: 'Kółko', tempo: 1, visual: true,
     desc: 'Przybliżaj, gdy kółko rośnie, cofaj, gdy maleje.' },
   { id: 'fast', name: 'Szybkie cykle', tempo: 0.5, visual: true,
-    desc: 'Ten sam rytm, dwa razy szybciej. Więcej zmian kierunku w jednej minucie.' },
+    desc: 'Ten sam rytm, dwa razy szybciej.' },
   { id: 'slow', name: 'Wolne cykle', tempo: 1.5, visual: true,
-    desc: 'Dłuższe przybliżanie i cofanie, z pełnym skupieniem na każdym cyklu.' },
+    desc: 'Dłuższe cykle, pełne skupienie na każdym.' },
   { id: 'pencil', name: 'Ołówek', tempo: 1, visual: false,
-    desc: 'Ołówek na wyciągnięcie ręki. Przybliżaj do nosa na dźwięk, cofaj na kolejny. Telefon działa jako metronom.' },
+    desc: 'Ołówek w dłoni, telefon odmierza rytm dźwiękiem.' },
 ];
 
 const BADGES = [
@@ -192,18 +192,32 @@ function achievementStats() {
 
 function renderStreak() {
   const n = currentStreak();
-  $('#streak-text').textContent = n > 0
-    ? `Seria: ${n} ${n === 1 ? 'dzień' : 'dni'} z rzędu.`
-    : 'Zacznij serię: wystarczy jedna sesja dziennie.';
+  $('#streak-text').textContent = `${n} ${n === 1 ? 'dzień' : 'dni'}`;
 }
 
 function renderExercise() {
-  const select = $('#exercise');
+  const box = $('#exercise');
   if (!chosenExerciseId) chosenExerciseId = nextExerciseId();
-  if (select.options.length === 0) {
-    for (const e of EXERCISES) select.append(new Option(e.name, e.id));
+  if (box.children.length === 0) {
+    for (const e of EXERCISES) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip-btn';
+      b.dataset.id = e.id;
+      b.setAttribute('role', 'radio');
+      b.textContent = e.name;
+      b.addEventListener('click', () => {
+        chosenExerciseId = e.id;
+        renderExercise();
+      });
+      box.append(b);
+    }
   }
-  select.value = chosenExerciseId;
+  for (const b of box.children) {
+    const on = b.dataset.id === chosenExerciseId;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+  }
   $('#exercise-desc').textContent = exerciseOf(chosenExerciseId).desc;
 }
 
@@ -227,35 +241,25 @@ function renderBadges() {
 }
 
 // ---------- ekran startowy ----------
-function renderHome() {
-  const now = Date.now();
-  const today = dayKey(now);
-  const sessions = data.sessions;
+const RING_LENGTH = 2 * Math.PI * 100; // obwód pierścienia (r = 100 w SVG)
 
-  const todayReps = sessions
+function renderHome() {
+  const today = dayKey(Date.now());
+  const todayReps = data.sessions
     .filter((s) => dayKey(s.startedAt) === today)
     .reduce((sum, s) => sum + s.reps, 0);
-  const weekCount = sessions.filter(
-    (s) => now - Date.parse(s.startedAt) < 7 * 24 * 60 * 60 * 1000
-  ).length;
-  const last = sessions.reduce((m, s) => (!m || s.startedAt > m.startedAt ? s : m), null);
-
   $('#stat-today').textContent = todayReps;
-  $('#stat-week').textContent = weekCount;
-  $('#stat-last').textContent = last
-    ? `Ostatnia sesja: ${fmtDate(last.startedAt)}`
-    : 'Jeszcze nie ćwiczyłeś. Zacznij od krótkiej sesji.';
 
-  // Plan tygodniowy
+  // Plan tygodniowy: pierścień wokół przycisku start
   const planned = weeklyPlanned();
   const done = sessionsThisWeek();
-  $('#week-text').textContent = `${done} z ${planned} sesji`;
-  $('#week-fill').style.width = `${Math.min(100, (done / planned) * 100)}%`;
+  $('#week-text').textContent = `${done} z ${planned} sesji w tym tygodniu`;
+  $('#ring-fill').style.strokeDashoffset = (RING_LENGTH * (1 - Math.min(1, done / planned))).toFixed(1);
 
   const perDay = data.settings.sessionsPerDay;
   $('#today-text').textContent = isTrainingDayToday()
-    ? `Dziś zaplanowano ${perDay} ${perDay === 1 ? 'sesję' : 'sesje'}. Wykonano: ${sessionsToday()}.`
-    : 'Dziś dzień bez treningu.';
+    ? `Dziś: ${sessionsToday()} z ${perDay} sesji`
+    : 'Dziś dzień bez treningu';
 
   renderCheckup();
   renderStreak();
@@ -280,11 +284,11 @@ function renderCheckup() {
   let text = null;
 
   if (!last) {
-    text = 'Nie masz jeszcze pomiaru punktu bliży zbieżności. Zmierz go linijką RAF i umów wizytę kontrolną u specjalisty.';
+    text = 'Brak pomiaru punktu bliży zbieżności. Zmierz go linijką RAF i dodaj wynik.';
   } else {
     const days = daysSinceDateKey(last.date);
     if (days >= CHECKUP_INTERVAL_DAYS) {
-      text = `Od ostatniego pomiaru (${last.date}) minęło ${days} dni. Umów kontrolę u ortoptysty lub optometrysty.`;
+      text = `Ostatni pomiar sprzed ${days} dni. Umów kontrolę u ortoptysty lub optometrysty.`;
     }
   }
 
@@ -619,10 +623,6 @@ function buildIcs() {
 $$('[data-nav]').forEach((b) => b.addEventListener('click', () => show(b.dataset.nav)));
 
 $('#btn-start').addEventListener('click', startTraining);
-$('#exercise').addEventListener('change', (e) => {
-  chosenExerciseId = e.target.value;
-  renderExercise();
-});
 $('#btn-rep').addEventListener('click', addRep);
 $('#btn-stop').addEventListener('click', () => finishTraining());
 
