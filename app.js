@@ -327,6 +327,7 @@ async function startTraining() {
     exercise: ex,
     reps: 0,
     lastCycle: -1,
+    doubles: 0,    // ile razy naciśnięto „Widzę podwójnie”
   };
 
   const isFocus = ex.kind === 'focus';
@@ -405,6 +406,8 @@ function addRep() {
 
 function finishTraining({ safety = false } = {}) {
   if (!run) return;
+  holdCancel();
+  const doubles = run.doubles || 0;
   clearInterval(timer);
   timer = null;
   cancelAnimationFrame(frameId);
@@ -426,6 +429,7 @@ function finishTraining({ safety = false } = {}) {
       tempoSec: run.tempoMs / 1000,
       exerciseId: run.exercise.id,
       stoppedForSafety: safety,
+      doubleCount: doubles,
     });
   }
 
@@ -434,6 +438,13 @@ function finishTraining({ safety = false } = {}) {
   vibrate([80, 60, 80]);
   show('home');
   toast(saved ? `Zapisano: ${reps} powtórzeń` : 'Sesja za krótka, nie zapisano');
+
+  // Po sesji z „Widzę podwójnie” można od razu zapisać odległość (jeśli opcja jest włączona).
+  if (doubles > 0 && data.settings.askMeasurement) {
+    $('#double-cm').value = '';
+    $('#double').hidden = false;
+    $('#double-cm').focus();
+  }
 }
 
 // ---------- historia ----------
@@ -659,22 +670,38 @@ $$('[data-nav]').forEach((b) => b.addEventListener('click', () => show(b.dataset
 
 $('#btn-start').addEventListener('click', startTraining);
 $('#btn-rep').addEventListener('click', addRep);
-$('#btn-stop').addEventListener('click', () => finishTraining());
-
-$('#btn-safety').addEventListener('click', () => {
-  finishTraining({ safety: true });
-  $('#safety').hidden = false;
-});
-$('#safety-ok').addEventListener('click', () => ($('#safety').hidden = true));
 
 // Widzę podwójnie: zapisz sesję i poproś o odległość w cm (ten wynik to punkt bliży zbieżności).
+// „Widzę podwójnie” tylko zaznacza moment i nie kończy sesji.
 $('#btn-double').addEventListener('click', () => {
-  finishTraining();
-  if (!data.settings.askMeasurement) return; // domyślnie bez pytania, sesja i tak jest zapisana
-  $('#double-cm').value = '';
-  $('#double').hidden = false;
-  $('#double-cm').focus();
+  if (!run) return;
+  run.doubles++;
+  vibrate([40, 40, 40]);
+  toast('Zaznaczono. Odsuń telefon, aż obraz się połączy.');
 });
+
+// Stop: trzeba przytrzymać przez chwilę, żeby nie zakończyć sesji przypadkiem.
+const STOP_HOLD_MS = 1200;
+let holdTimer = null;
+const stopBtn = $('#btn-stop');
+
+function holdCancel() {
+  clearTimeout(holdTimer);
+  holdTimer = null;
+  stopBtn.classList.remove('holding');
+}
+
+stopBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  stopBtn.classList.add('holding');
+  holdTimer = setTimeout(() => {
+    holdCancel();
+    finishTraining();
+  }, STOP_HOLD_MS);
+});
+['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => stopBtn.addEventListener(ev, holdCancel));
+
+$('#btn-back').addEventListener('click', () => finishTraining());
 $('#double-skip').addEventListener('click', () => ($('#double').hidden = true));
 $('#double-save').addEventListener('click', () => {
   const npcCm = Number($('#double-cm').value.replace(',', '.'));

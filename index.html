@@ -25,16 +25,6 @@
     </div>
   </div>
 
-  <!-- Przerwanie ćwiczenia ze względów bezpieczeństwa -->
-  <div id="safety" class="overlay" hidden>
-    <div class="card">
-      <h2>Przerwano ćwiczenie</h2>
-      <p>Jeśli ból, zawroty głowy lub podwójne widzenie nie ustąpią po odpoczynku, skontaktuj się z lekarzem okulistą lub ortoptystą.</p>
-      <p>Przy nagłym pogorszeniu wzroku lub silnym bólu oka zgłoś się od razu do lekarza.</p>
-      <button id="safety-ok" class="btn primary big">Rozumiem</button>
-    </div>
-  </div>
-
   <!-- Zapis odległości, przy której pojawiło się podwójne widzenie -->
   <div id="double" class="overlay" hidden>
     <div class="card">
@@ -121,6 +111,7 @@
 
     <!-- Ekran treningu -->
     <section data-screen="train" class="train" hidden>
+      <button id="btn-back" class="back-btn" type="button">‹ Start</button>
       <div class="train-head">
         <span id="train-time">00:00</span>
         <span><span id="train-count">0</span> powt.</span>
@@ -132,9 +123,8 @@
       </div>
       <p id="train-hint" class="muted small">Kółko rośnie: przybliżaj. Kółko maleje: cofaj.</p>
       <button id="btn-rep" class="btn primary big">+1 powtórzenie</button>
-      <button id="btn-double" class="btn ghost" hidden>Widzę podwójnie</button>
-      <button id="btn-safety" class="btn danger">Ból, zawroty lub podwójne widzenie – przerwij</button>
-      <button id="btn-stop" class="btn ghost">Zakończ</button>
+      <button id="btn-double" class="double-btn" type="button" hidden>Widzę podwójnie</button>
+      <button id="btn-stop" class="stop-btn" type="button"><span>Stop · przytrzymaj</span></button>
     </section>
 
     <!-- Historia -->

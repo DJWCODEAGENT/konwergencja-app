@@ -191,6 +191,7 @@ body.training .tabbar { display: none; }
 .card ul { padding-left: 18px; color: var(--muted); }
 
 .toast {
+  pointer-events: none; /* komunikat nigdy nie zasłania przycisków */
   position: fixed;
   left: 50%;
   bottom: calc(90px + env(safe-area-inset-bottom));
@@ -201,7 +202,7 @@ body.training .tabbar { display: none; }
   max-width: 90vw;
   z-index: 20;
 }
-body.training .toast { bottom: 24px; }
+body.training .toast { top: auto; bottom: 200px; }
 
 /* Wykres */
 #chart svg {
@@ -309,6 +310,67 @@ body.training .toast { bottom: 24px; }
   font: inherit;
   margin: 8px 0 12px;
 }
+
+/* Ekran treningu: powrót na górze, duży przycisk „Widzę podwójnie”, mały Stop */
+.back-btn {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 8px 4px;
+  cursor: pointer;
+}
+
+.double-btn {
+  width: 100%;
+  min-height: 104px;
+  margin: 12px 0 8px;
+  border: 0;
+  border-radius: 22px;
+  background: #f59e0b;
+  color: #1f1300;
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.double-btn:active { transform: scale(0.98); }
+
+/* Stop: mały, z tłem w kolorze ostrzeżenia, wypełnia się podczas przytrzymania */
+.stop-btn {
+  position: relative;
+  overflow: hidden;
+  align-self: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+.stop-btn span { position: relative; }
+.stop-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(248, 113, 113, 0.35);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.2s linear;
+}
+.stop-btn.holding::before { transform: scaleX(1); }
+.stop-btn.holding { color: var(--danger); border-color: var(--danger); }
 
 /* Obręcz tylko pokazuje postęp. Nie może przechwytywać dotknięć przycisku Start. */
 .ring svg {
