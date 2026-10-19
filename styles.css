@@ -289,6 +289,27 @@ body.training .toast { bottom: 24px; }
   display: grid;
   place-items: center;
 }
+/* Ostry punkt do fiksacji: stały, bez animacji, żeby było na czym skupić wzrok. */
+.fixation {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px var(--accent);
+}
+
+/* Pole w oknach dialogowych */
+.card input {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  margin: 8px 0 12px;
+}
+
 /* Obręcz tylko pokazuje postęp. Nie może przechwytywać dotknięć przycisku Start. */
 .ring svg {
   position: absolute;
@@ -341,9 +362,16 @@ body.training .toast { bottom: 24px; }
   padding: 10px 12px;
   font: inherit;
   font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-align: center;
   cursor: pointer;
 }
+.chip-btn svg { width: 18px; height: 18px; flex: none; }
+/* Domyślny tryb na pełną szerokość, żeby wyróżniał się wśród pozostałych. */
+.chip-btn[data-id="focus"] { grid-column: 1 / -1; min-height: 52px; font-weight: 600; }
 .chip-btn.on { background: #12302f; border-color: var(--accent); color: var(--accent); font-weight: 600; }
 /* Stała wysokość na dwie linie, żeby zmiana ćwiczenia nie przesuwała reszty ekranu */
 .hint {

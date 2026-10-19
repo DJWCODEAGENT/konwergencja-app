@@ -35,6 +35,17 @@
     </div>
   </div>
 
+  <!-- Zapis odległości, przy której pojawiło się podwójne widzenie -->
+  <div id="double" class="overlay" hidden>
+    <div class="card">
+      <h2>Zapisz wynik</h2>
+      <p>Ile cm dzieliło telefon od nosa, gdy zobaczyłeś dwa obrazy? Zmierz linijką.</p>
+      <input id="double-cm" type="text" inputmode="decimal" placeholder="np. 12,5" aria-label="Odległość w cm">
+      <button id="double-save" class="btn primary big">Zapisz pomiar</button>
+      <button id="double-skip" class="btn ghost">Pomiń</button>
+    </div>
+  </div>
+
   <main>
     <!-- Ekran startowy -->
     <section data-screen="home" class="screen">
@@ -96,9 +107,11 @@
       <p id="cue" class="cue" aria-live="polite">Przybliżaj</p>
       <div id="stage" class="stage">
         <div id="target" class="target"><div id="core" class="core"></div></div>
+        <div id="fixation" class="fixation" hidden></div>
       </div>
       <p id="train-hint" class="muted small">Kółko rośnie: przybliżaj. Kółko maleje: cofaj.</p>
       <button id="btn-rep" class="btn primary big">+1 powtórzenie</button>
+      <button id="btn-double" class="btn ghost" hidden>Widzę podwójnie</button>
       <button id="btn-safety" class="btn danger">Ból, zawroty lub podwójne widzenie – przerwij</button>
       <button id="btn-stop" class="btn ghost">Zakończ</button>
     </section>

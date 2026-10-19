@@ -120,16 +120,30 @@ function isTrainingDayToday() {
 
 // ---------- ćwiczenia i osiągnięcia ----------
 // Ćwiczenia różnią się tempem i formą. Kolejne sesje rotują między nimi.
+// Ikony w stylu linii, takie same jak w reszcie aplikacji.
+const ico = (body) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+
+// kind: 'focus' = ostry punkt na środku, 'circle' = kółko, 'pencil' = tylko rytm dźwiękiem.
 const EXERCISES = [
-  { id: 'circle', name: 'Kółko', tempo: 1, visual: true,
+  { id: 'focus', name: 'Ołówek na telefonie', kind: 'focus', tempo: 1, visual: true,
+    icon: ico('<rect x="7" y="2" width="10" height="20" rx="2.5"/><circle cx="12" cy="12" r="2"/>'),
+    desc: 'Patrz na ostry punkt na środku. Przybliżaj telefon do nosa, aż zobaczysz dwa.' },
+  { id: 'circle', name: 'Kółko', kind: 'circle', tempo: 1, visual: true,
+    icon: ico('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'),
     desc: 'Przybliżaj, gdy kółko rośnie, cofaj, gdy maleje.' },
-  { id: 'fast', name: 'Szybkie cykle', tempo: 0.5, visual: true,
+  { id: 'fast', name: 'Szybkie cykle', kind: 'circle', tempo: 0.5, visual: true,
+    icon: ico('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
     desc: 'Ten sam rytm, dwa razy szybciej.' },
-  { id: 'slow', name: 'Wolne cykle', tempo: 1.5, visual: true,
+  { id: 'slow', name: 'Wolne cykle', kind: 'circle', tempo: 1.5, visual: true,
+    icon: ico('<path d="M6 3h12M6 21h12M7 3c0 4 10 5 10 9s-10 5-10 9M17 3c0 4-10 5-10 9s10 5 10 9"/>'),
     desc: 'Dłuższe cykle, pełne skupienie na każdym.' },
-  { id: 'pencil', name: 'Ołówek', tempo: 1, visual: false,
+  { id: 'pencil', name: 'Ołówek w dłoni', kind: 'pencil', tempo: 1, visual: false,
+    icon: ico('<path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/>'),
     desc: 'Ołówek w dłoni, telefon odmierza rytm dźwiękiem.' },
 ];
+
+const DEFAULT_EXERCISE = 'focus';
 
 const BADGES = [
   { id: 'first', title: 'Pierwsza sesja', test: (c) => c.sessions >= 1 },
@@ -143,12 +157,6 @@ const BADGES = [
 // Sesje zapisane przed dodaniem ćwiczeń traktujemy jako „Kółko”.
 const exerciseOf = (id) => EXERCISES.find((e) => e.id === (id ?? 'circle')) ?? EXERCISES[0];
 
-function nextExerciseId() {
-  const last = data.sessions.reduce((m, s) => (!m || s.startedAt > m.startedAt ? s : m), null);
-  if (!last) return EXERCISES[0].id;
-  const idx = EXERCISES.findIndex((e) => e.id === exerciseOf(last.exerciseId).id);
-  return EXERCISES[(idx + 1) % EXERCISES.length].id;
-}
 
 // Seria: ile dni z rzędu z sesją, licząc od dziś (a gdy dziś jeszcze nie ćwiczono, od wczoraj).
 function currentStreak() {
@@ -197,7 +205,7 @@ function renderStreak() {
 
 function renderExercise() {
   const box = $('#exercise');
-  if (!chosenExerciseId) chosenExerciseId = nextExerciseId();
+  if (!chosenExerciseId) chosenExerciseId = DEFAULT_EXERCISE;
   if (box.children.length === 0) {
     for (const e of EXERCISES) {
       const b = document.createElement('button');
@@ -205,7 +213,7 @@ function renderExercise() {
       b.className = 'chip-btn';
       b.dataset.id = e.id;
       b.setAttribute('role', 'radio');
-      b.textContent = e.name;
+      b.innerHTML = `${e.icon}<span>${e.name}</span>`;
       b.addEventListener('click', () => {
         chosenExerciseId = e.id;
         renderExercise();
@@ -309,11 +317,18 @@ async function startTraining() {
     lastCycle: -1,
   };
 
+  const isFocus = ex.kind === 'focus';
   $('#train-count').textContent = '0';
   $('#stage').hidden = !ex.visual;
-  $('#train-hint').textContent = ex.visual
-    ? 'Kółko rośnie: przybliżaj. Kółko maleje: cofaj.'
-    : 'Rytm dźwięku: przybliżaj, potem cofaj.';
+  $('#target').hidden = isFocus;
+  $('#fixation').hidden = !isFocus;
+  $('#btn-rep').hidden = isFocus;
+  $('#btn-double').hidden = !isFocus;
+  $('#train-hint').textContent = isFocus
+    ? 'Patrz na środek. Przybliżaj na dźwięk, cofaj na kolejny.'
+    : ex.visual
+      ? 'Kółko rośnie: przybliżaj. Kółko maleje: cofaj.'
+      : 'Rytm dźwięku: przybliżaj, potem cofaj.';
   $('#cue').textContent = 'Przybliżaj';
   show('train');
 
@@ -323,7 +338,7 @@ async function startTraining() {
 
   tick();
   timer = setInterval(tick, 200);
-  if (ex.visual) frameId = requestAnimationFrame(frame);
+  if (ex.kind === 'circle') frameId = requestAnimationFrame(frame);
 }
 
 // Rozmiar kółka i podpis liczone z czasu, płynnie co klatkę.
@@ -355,8 +370,15 @@ function tick() {
   if (cycle !== run.lastCycle) {
     run.lastCycle = cycle;
     beep();
-    // Bez kółka (ołówek) podpis zmienia się wraz z rytmem dźwięku.
-    if (!run.exercise.visual) $('#cue').textContent = cycle % 2 === 0 ? 'Przybliżaj' : 'Cofaj';
+    // Bez kółka podpis zmienia się wraz z rytmem dźwięku.
+    if (run.exercise.kind !== 'circle') {
+      $('#cue').textContent = cycle % 2 === 0 ? 'Przybliżaj' : 'Cofaj';
+    }
+    // W trybie z punktem licznik pokazuje, ile razy przybliżono telefon.
+    if (run.exercise.kind === 'focus') {
+      run.reps++;
+      $('#train-count').textContent = run.reps;
+    }
   }
 
   if (left <= 0) finishTraining();
@@ -631,6 +653,26 @@ $('#btn-safety').addEventListener('click', () => {
   $('#safety').hidden = false;
 });
 $('#safety-ok').addEventListener('click', () => ($('#safety').hidden = true));
+
+// Widzę podwójnie: zapisz sesję i poproś o odległość w cm (ten wynik to punkt bliży zbieżności).
+$('#btn-double').addEventListener('click', () => {
+  finishTraining();
+  $('#double-cm').value = '';
+  $('#double').hidden = false;
+  $('#double-cm').focus();
+});
+$('#double-skip').addEventListener('click', () => ($('#double').hidden = true));
+$('#double-save').addEventListener('click', () => {
+  const npcCm = Number($('#double-cm').value.replace(',', '.'));
+  if (!Number.isFinite(npcCm) || npcCm <= 0 || npcCm > 100) {
+    toast('Podaj wynik w cm (np. 12,5)');
+    return;
+  }
+  addMeasurement(data, { id: newId(), date: dayKey(Date.now()), npcCm });
+  $('#double').hidden = true;
+  renderHome();
+  toast('Zapisano pomiar');
+});
 
 $('#npc-form').addEventListener('submit', (e) => {
   e.preventDefault();
