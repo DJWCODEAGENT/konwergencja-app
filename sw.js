@@ -1,7 +1,7 @@
 // Service worker: pozwala uruchomić aplikację bez internetu.
 // Po zmianie plików podbij numer wersji CACHE, żeby użytkownicy dostali nowe pliki.
 
-const CACHE = 'konwergencja-v15';
+const CACHE = 'konwergencja-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -15,7 +15,12 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  // cache: 'reload' omija pamięć HTTP. Dzięki temu nie zapisujemy starych i nowych plików razem.
+  event.waitUntil(
+    caches.open(CACHE).then((cache) =>
+      cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' })))
+    )
+  );
   self.skipWaiting();
 });
 
